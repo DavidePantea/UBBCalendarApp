@@ -7,8 +7,8 @@ import { useRouter } from 'expo-router';
 export default function GroupSelectionScreen() {
   const router = useRouter();
 
-  const handleGroupPress = (group: string) => {
-    alert(`Group ${group} selected`);
+  const handleGroupPress = (year: string) => {
+    router.push('/SubjectsSelection');
   };
 
   return (
