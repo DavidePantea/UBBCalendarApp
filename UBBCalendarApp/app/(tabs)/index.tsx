@@ -1,29 +1,39 @@
-// app/(tabs)/index.tsx (TabTwoScreen)
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Pressable, Text } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useRouter } from 'expo-router';
+import { fetchYears } from '../../database/database';
 
 export default function TabOneScreen() {
   const router = useRouter();
+  const [years, setYears] = useState<any[]>([]);
 
-  const handleYearPress = (year: string) => {
-    router.push('/GroupSelection');
+  useEffect(() => {
+    const loadYears = async () => {
+      const data = await fetchYears();
+      setYears(data);
+    };
+    loadYears();
+  }, []);
+
+  const handleYearPress = (yearId: number) => {
+    router.push(`/GroupSelection?yearId=${yearId}`);
   };
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title">Select the Year</ThemedText>
+      <ThemedText type="title">Selectează anul:</ThemedText>
       <View style={styles.buttonContainer}>
-        <Pressable style={styles.button} onPress={() => handleYearPress('2022')}>
-          <Text style={styles.buttonText}>2022</Text>
-        </Pressable>
-        <Pressable style={styles.button} onPress={() => handleYearPress('2023')}>
-          <Text style={styles.buttonText}>2023</Text>
-        </Pressable>
-        <Pressable style={styles.button} onPress={() => handleYearPress('2024')}>
-          <Text style={styles.buttonText}>2024</Text>
-        </Pressable>
+        {years.map((year) => (
+          <Pressable
+            key={year.id}
+            style={styles.button}
+            onPress={() => handleYearPress(year.id)}
+          >
+            <Text style={styles.buttonText}>{year.year}</Text>
+          </Pressable>
+        ))}
       </View>
     </ThemedView>
   );

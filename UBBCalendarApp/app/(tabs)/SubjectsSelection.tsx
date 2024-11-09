@@ -1,61 +1,61 @@
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Pressable, Text } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { fetchSubjects } from '../../database/database';
 
 export default function SubjectsSelection() {
   const router = useRouter();
+  const { groupId } = useLocalSearchParams(); // Get the groupId from the previous screen
+  const [subjects, setSubjects] = useState<any[]>([]);
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
 
-  const handleSubjectPress = (subject: string) => {
-    if (selectedSubjects.includes(subject)) {
+  // Fetch subjects when the screen loads
+  useEffect(() => {
+    const loadSubjects = async () => {
+      if (groupId) {
+        const data = await fetchSubjects(Number(groupId));
+        console.log('Subjects data:', data); // Debug log
+        setSubjects(data);
+      }
+    };
+    loadSubjects();
+  }, [groupId]);
+
+  const handleSubjectPress = (subjectName: string) => {
+    if (selectedSubjects.includes(subjectName)) {
       // Remove the subject if it's already selected
-      setSelectedSubjects(selectedSubjects.filter((item) => item !== subject));
+      setSelectedSubjects(selectedSubjects.filter((item) => item !== subjectName));
     } else {
       // Add the subject to the selected list
-      setSelectedSubjects([...selectedSubjects, subject]);
+      setSelectedSubjects([...selectedSubjects, subjectName]);
     }
   };
 
-  const isSelected = (subject: string) => selectedSubjects.includes(subject);
+  const isSelected = (subjectName: string) => selectedSubjects.includes(subjectName);
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title">Select a Group</ThemedText>
+      <ThemedText type="title">Select a Subject</ThemedText>
       <View style={styles.buttonContainer}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            isSelected('AI') && styles.buttonSelected,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={() => handleSubjectPress('AI')}
-        >
-          <Text style={styles.buttonText}>AI</Text>
-        </Pressable>
-
-        <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            isSelected('Proiect Colectiv') && styles.buttonSelected,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={() => handleSubjectPress('Proiect Colectiv')}
-        >
-          <Text style={styles.buttonText}>Proiect Colectiv</Text>
-        </Pressable>
-
-        <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            isSelected('Limba Spaniola') && styles.buttonSelected,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={() => handleSubjectPress('Limba Spaniola')}
-        >
-          <Text style={styles.buttonText}>Limba Spaniola</Text>
-        </Pressable>
+        {subjects.length > 0 ? (
+          subjects.map((subject) => (
+            <Pressable
+              key={subject.id}
+              style={({ pressed }) => [
+                styles.button,
+                isSelected(subject.subject_name) && styles.buttonSelected,
+                pressed && styles.buttonPressed,
+              ]}
+              onPress={() => handleSubjectPress(subject.subject_name)}
+            >
+              <Text style={styles.buttonText}>{subject.subject_name}</Text>
+            </Pressable>
+          ))
+        ) : (
+          <Text style={styles.noDataText}>No subjects available</Text>
+        )}
       </View>
     </ThemedView>
   );
@@ -89,5 +89,10 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#007BFF',
     fontWeight: 'bold',
+  },
+  noDataText: {
+    color: '#FFFFFF',
+    marginTop: 20,
+    fontSize: 18,
   },
 });
