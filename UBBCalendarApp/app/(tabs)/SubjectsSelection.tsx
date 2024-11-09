@@ -33,6 +33,10 @@ export default function SubjectsSelection() {
     }
   };
 
+  const handleViewSchedule = () => {
+    router.push(`/SubjectSchedule?groupId=${groupId}`);
+  };
+
   const isSelected = (subjectName: string) => selectedSubjects.includes(subjectName);
 
   return (
@@ -57,6 +61,13 @@ export default function SubjectsSelection() {
           <Text style={styles.noDataText}>No subjects available</Text>
         )}
       </View>
+
+      {/* Conditionally render the "View Full Schedule" button */}
+      {selectedSubjects.length > 0 && (
+        <Pressable style={styles.scheduleButton} onPress={handleViewSchedule}>
+          <Text style={styles.scheduleButtonText}>View Full Schedule</Text>
+        </Pressable>
+      )}
     </ThemedView>
   );
 }
@@ -81,13 +92,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonSelected: {
-    backgroundColor: '#28a745', // Green color when selected
+    backgroundColor: '#28a745',
   },
   buttonPressed: {
-    backgroundColor: '#D0D0D0', // Gray color when pressed
+    backgroundColor: '#D0D0D0',
   },
   buttonText: {
     color: '#007BFF',
+    fontWeight: 'bold',
+  },
+  scheduleButton: {
+    backgroundColor: '#007BFF',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  scheduleButtonText: {
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
   noDataText: {

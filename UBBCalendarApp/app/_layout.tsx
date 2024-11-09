@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { initializeDatabase, insertSampleData } from '../database/database';
+import { dropAllTables, initializeDatabase, insertSampleData } from '../database/database';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -24,7 +24,7 @@ export default function RootLayout() {
       try {
         await initializeDatabase();
         console.log('Database initialized successfully');
-        //await insertSampleData();
+        await insertSampleData();
         setDbReady(true);
       } catch (error) {
         console.error('Error initializing database:', error);
