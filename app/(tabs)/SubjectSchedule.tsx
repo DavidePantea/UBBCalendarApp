@@ -23,7 +23,12 @@ export default function SubjectScheduleScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title">Group Schedule</ThemedText>
+      {/* Title at the top */}
+      <ThemedText type="title" style={styles.title}>
+        Group Schedule
+      </ThemedText>
+  
+      {/* Schedule items in the middle */}
       <View style={styles.scheduleContainer}>
         {schedule.length > 0 ? (
           schedule.map((item, index) => (
@@ -39,33 +44,47 @@ export default function SubjectScheduleScreen() {
       </View>
     </ThemedView>
   );
+  
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between', // Space out elements (title, schedule, footer)
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#011f4b',
+    backgroundColor: '#06a77d',
+  },
+  title: {
+    marginTop: 20, // Space from the top
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#0e0e52',
   },
   scheduleContainer: {
+    flex: 1, // Allow this section to take up the middle space
     width: '100%',
     padding: 16,
+    justifyContent: 'center', // Center schedule items vertically
+    alignItems: 'center', // Align items horizontally in the center
   },
   scheduleItem: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#005377',
     padding: 10,
     marginVertical: 5,
     borderRadius: 8,
+    width: '90%', // Make the items slightly smaller than the container width
   },
   subjectText: {
-    color: '#007BFF',
+    color: '#cfdee7',
     fontWeight: 'bold',
   },
   noDataText: {
-    color: '#FFFFFF',
-    marginTop: 20,
+    color: '#800016',
     fontSize: 18,
+    textAlign: 'center',
+    marginTop: 20, // Add space between the message and other elements
   },
 });
+

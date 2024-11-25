@@ -41,7 +41,12 @@ export default function SubjectsSelection() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title">Select a Subject</ThemedText>
+      {/* Title at the top */}
+      <ThemedText type="title" style={styles.title}>
+        Select a Subject
+      </ThemedText>
+  
+      {/* Subject buttons in the middle */}
       <View style={styles.buttonContainer}>
         {subjects.length > 0 ? (
           subjects.map((subject) => (
@@ -61,8 +66,8 @@ export default function SubjectsSelection() {
           <Text style={styles.noDataText}>No subjects available</Text>
         )}
       </View>
-
-      {/* Conditionally render the "View Full Schedule" button */}
+  
+      {/* "View Full Schedule" button at the bottom */}
       {selectedSubjects.length > 0 && (
         <Pressable style={styles.scheduleButton} onPress={handleViewSchedule}>
           <Text style={styles.scheduleButtonText}>View Full Schedule</Text>
@@ -70,51 +75,63 @@ export default function SubjectsSelection() {
       )}
     </ThemedView>
   );
+  
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between', // Space elements evenly (top, middle, bottom)
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#011f4b',
+    backgroundColor: '#06a77d',
+  },
+  title: {
+    marginTop: 15, // Optional padding from the top
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#0e0e52', // Ensure it's readable
   },
   buttonContainer: {
-    width: '80%',
+    flex: 1, // Allow this section to take up the middle space
+    justifyContent: 'center', // Align buttons in the center
+    alignItems: 'center',
     gap: 10,
+    width: '80%',
   },
   button: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#005377',
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: 'center',
   },
   buttonSelected: {
-    backgroundColor: '#28a745',
+    backgroundColor: '#0d21a1',
   },
   buttonPressed: {
-    backgroundColor: '#D0D0D0',
+    backgroundColor: '#588157',
   },
   buttonText: {
-    color: '#007BFF',
+    color: '#cfdee7',
     fontWeight: 'bold',
   },
   scheduleButton: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#005377',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
-    marginTop: 20,
+    marginBottom: 15, // Space from the bottom
   },
   scheduleButtonText: {
-    color: '#FFFFFF',
+    color: '#cfdee7',
     fontWeight: 'bold',
   },
   noDataText: {
-    color: '#FFFFFF',
+    color: '#800016',
     marginTop: 20,
     fontSize: 18,
   },
 });
+

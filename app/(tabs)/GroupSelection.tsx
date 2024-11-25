@@ -28,7 +28,12 @@ export default function GroupSelectionScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title">Select a Group</ThemedText>
+      {/* Title at the top */}
+      <ThemedText type="title" style={styles.title}>
+        Select a Group
+      </ThemedText>
+  
+      {/* Group buttons in the middle */}
       <View style={styles.buttonContainer}>
         {groups.length > 0 ? (
           groups.map((group) => (
@@ -46,34 +51,48 @@ export default function GroupSelectionScreen() {
       </View>
     </ThemedView>
   );
+  
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between', // Space out the title, buttons, and other elements
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#011f4b',
+    backgroundColor: '#06a77d',
+  },
+  title: {
+    marginTop: 20, // Add space from the top
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#0e0e52', // Ensure text is visible
   },
   buttonContainer: {
-    width: '80%',
+    flex: 1, // Take up the middle space
+    justifyContent: 'center', // Center buttons vertically
+    alignItems: 'center', // Center buttons horizontally
     gap: 10,
+    width: '80%',
   },
   button: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#005377',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
     alignItems: 'center',
+    width: '100%', // Make the buttons stretch to fit the container width
   },
   buttonText: {
-    color: '#007BFF',
+    color: '#cfdee7',
     fontWeight: 'bold',
   },
   noDataText: {
-    color: '#FFFFFF',
-    marginTop: 20,
+    color: '#800016',
     fontSize: 18,
+    textAlign: 'center',
+    marginTop: 20, // Add space below the title
   },
 });
+
