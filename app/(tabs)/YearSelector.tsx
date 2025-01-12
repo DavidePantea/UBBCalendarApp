@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   noDataText: {
-    color: '#800016',
+    color: '#80DEEA',
     marginTop: 20,
     fontSize: 18,
   },

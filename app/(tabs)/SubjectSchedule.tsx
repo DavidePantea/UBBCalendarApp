@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   noDataText: {
-    color: '#800016',
+    color: '#80DEEA',
     fontSize: 18,
     textAlign: 'center',
     marginTop: 20,

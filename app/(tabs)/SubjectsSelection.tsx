@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#7B1FA2',
   },
   buttonPressed: {
-    backgroundColor: '#588157',
+    backgroundColor: '#80DEEA',
   },
   buttonText: {
     color: '#FFFFFF',
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   noDataText: {
-    color: '#800016',
+    color: '#80DEEA',
     marginTop: 20,
     fontSize: 18,
   },
