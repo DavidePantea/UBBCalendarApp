@@ -65,13 +65,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#06a77d',
+    backgroundColor: '#003BB5',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#0e0e52',
+    color: '#FEFFFE',
   },
   inputContainer: {
     width: '80%',
@@ -87,14 +87,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#005377',
+    backgroundColor: '#1A237E',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#cfdee7',
+    color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 16,
   },

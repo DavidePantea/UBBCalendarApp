@@ -85,14 +85,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#06a77d',
+    backgroundColor: '#003BB5',
   },
   title: {
     marginTop: 20,
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#0e0e52',
+    color: '#FEFFFE',
   },
   scheduleContainer: {
     flex: 1,
@@ -110,14 +110,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   scheduleItem: {
-    backgroundColor: '#005377',
+    backgroundColor: '#1A237E',
     padding: 10,
     marginVertical: 5,
     borderRadius: 8,
     width: '100%',
   },
   subjectText: {
-    color: '#cfdee7',
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
   noDataText: {

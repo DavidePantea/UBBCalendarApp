@@ -107,14 +107,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#06a77d',
+    backgroundColor: '#003BB5',
   },
   title: {
     marginTop: 15,
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#0e0e52',
+    color: '#FEFFFE',
   },
   buttonContainer: {
     flex: 1,
@@ -124,24 +124,24 @@ const styles = StyleSheet.create({
     width: '80%',
   },
   button: {
-    backgroundColor: '#005377',
+    backgroundColor: '#1A237E',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 10,
     alignItems: 'center',
   },
   buttonSelected: {
-    backgroundColor: '#0d21a1',
+    backgroundColor: '#7B1FA2',
   },
   buttonPressed: {
     backgroundColor: '#588157',
   },
   buttonText: {
-    color: '#cfdee7',
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
   scheduleButton: {
-    backgroundColor: '#005377',
+    backgroundColor: '#1A237E',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -152,14 +152,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   modifyButton: {
-    backgroundColor: '#800016',
+    backgroundColor: '#1A237E',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
     marginBottom: 15,
   },
   modifyButtonText: {
-    color: '#ffffff',
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
   noDataText: {
