@@ -16,17 +16,18 @@ export default function TabLayout() {
           backgroundColor: Colors[colorScheme ?? 'light'].background,
           height: 60, // Slightly increased height for usability
           borderTopWidth: 1,
-          borderTopColor: Colors[colorScheme ?? 'light'].separator,
+          borderTopColor: Colors[colorScheme ?? 'light'].separator || '#e0e0e0', // Provide fallback for separator
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600',
         },
-        headerShown: false,  // Hide header for all tabs
-      }}>
-      {/* Only the Home tab is defined */}
+        headerShown: false, // Hide header for all tabs
+      }}
+    >
+      {/* LogIn is now the home tab */}
       <Tabs.Screen
-        name="index" // Home screen
+        name="index"
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
@@ -37,3 +38,4 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
