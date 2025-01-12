@@ -3,51 +3,44 @@ import { StyleSheet, View, Pressable, Text } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { fetchGroups } from '../../database/database';
+import { fetchYears } from '../../database/database';
 
-export default function GroupSelectionScreen() {
+export default function TabOneScreen() {
   const router = useRouter();
-  const { yearId, userRole } = useLocalSearchParams(); // Get yearId and userRole from the previous screen
-  const [groups, setGroups] = useState<any[]>([]);
+  const { userRole } = useLocalSearchParams(); // Get the user role from query parameters
+  const [years, setYears] = useState<any[]>([]);
 
-  // Fetch groups when the screen loads
   useEffect(() => {
-    const loadGroups = async () => {
-      if (yearId) {
-        const data = await fetchGroups(Number(yearId));
-        console.log('Groups data:', data); // Debug log
-        setGroups(data);
-      }
+    const loadYears = async () => {
+      const data = await fetchYears();
+      setYears(data);
     };
-    loadGroups();
-  }, [yearId]);
+    loadYears();
+  }, []);
 
-  const handleGroupPress = (groupId: number) => {
-    // Pass userRole along with groupId to the next screen
-    router.push(`/SubjectsSelection?groupId=${groupId}&userRole=${userRole}`);
+  const handleYearPress = (yearId: number) => {
+    // Pass the userRole to the next screen
+    router.push(`/GroupSelection?yearId=${yearId}&userRole=${userRole}`);
   };
 
   return (
     <ThemedView style={styles.container}>
-      {/* Title at the top */}
       <ThemedText type="title" style={styles.title}>
-        Select a Group
+        Selectează anul:
       </ThemedText>
-  
-      {/* Group buttons in the middle */}
       <View style={styles.buttonContainer}>
-        {groups.length > 0 ? (
-          groups.map((group) => (
+        {years.length > 0 ? (
+          years.map((year) => (
             <Pressable
-              key={group.id}
+              key={year.id}
               style={styles.button}
-              onPress={() => handleGroupPress(group.id)}
+              onPress={() => handleYearPress(year.id)}
             >
-              <Text style={styles.buttonText}>{group.group_name}</Text>
+              <Text style={styles.buttonText}>{year.year}</Text>
             </Pressable>
           ))
         ) : (
-          <Text style={styles.noDataText}>No groups available</Text>
+          <Text style={styles.noDataText}>No years available</Text>
         )}
       </View>
     </ThemedView>
@@ -82,7 +75,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 8,
     alignItems: 'center',
-    width: '100%',
   },
   buttonText: {
     color: '#cfdee7',
@@ -90,8 +82,7 @@ const styles = StyleSheet.create({
   },
   noDataText: {
     color: '#800016',
-    fontSize: 18,
-    textAlign: 'center',
     marginTop: 20,
+    fontSize: 18,
   },
 });

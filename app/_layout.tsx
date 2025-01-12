@@ -57,6 +57,7 @@ export default function RootLayout() {
         
         {/* Additional Screens */}
         <Stack.Screen name="+not-found" />
+        <Stack.Screen name="LogIn" />
         <Stack.Screen name="GroupSelection" />
         <Stack.Screen name="SubjectSchedule" />
         <Stack.Screen name="SubjectSelection" />

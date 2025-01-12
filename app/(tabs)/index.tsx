@@ -1,75 +1,90 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Pressable, Text } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Pressable, Text, TextInput, Alert } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useRouter } from 'expo-router';
-import { fetchYears } from '../../database/database';
+import { fetchUsers } from '../../database/database'; // Import only fetchUsers
 
-export default function TabOneScreen() {
+export default function LoginScreen() {
   const router = useRouter();
-  const [years, setYears] = useState<any[]>([]);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-  useEffect(() => {
-    const loadYears = async () => {
-      const data = await fetchYears();
-      setYears(data);
-    };
-    loadYears();
-  }, []);
-
-  const handleYearPress = (yearId: number) => {
-    router.push(`/GroupSelection?yearId=${yearId}`);
+  const handleLogin = async () => {
+    try {
+      // Fetch all users using fetchUsers
+      const users = await fetchUsers(); // Ensure fetchUsers returns all fields: id, username, password, role
+  
+      // Validate username and password
+      const user = users.find(
+        (u) => u.username === username && u.password === password
+      );
+  
+      if (user) {
+        Alert.alert('Login Successful', `Welcome, ${user.username}!`);
+        router.push(`/YearSelector?userRole=${user.role}`); // Pass the role as a query parameter
+      } else {
+        Alert.alert('Login Failed', 'Invalid username or password');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      Alert.alert('Error', 'An error occurred while logging in.');
+    }
   };
 
   return (
     <ThemedView style={styles.container}>
-      {/* Title at the top */}
       <ThemedText type="title" style={styles.title}>
-        Selectează anul:
+        Login
       </ThemedText>
-  
-      {/* Year buttons in the middle */}
-      <View style={styles.buttonContainer}>
-        {years.length > 0 ? (
-          years.map((year) => (
-            <Pressable
-              key={year.id}
-              style={styles.button}
-              onPress={() => handleYearPress(year.id)}
-            >
-              <Text style={styles.buttonText}>{year.year}</Text>
-            </Pressable>
-          ))
-        ) : (
-          <Text style={styles.noDataText}>No years available</Text>
-        )}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={username}
+          onChangeText={setUsername}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
       </View>
+      <Pressable style={styles.button} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Login</Text>
+      </Pressable>
     </ThemedView>
   );
-  
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-between', // Space elements: title (top), buttons (middle)
+    justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
     backgroundColor: '#06a77d',
   },
   title: {
-    marginTop: 20, // Optional padding from the top
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#0e0e52', // Ensure readability
+    marginBottom: 20,
+    color: '#0e0e52',
   },
-  buttonContainer: {
-    flex: 1, // Take up the middle space
-    justifyContent: 'center', // Center buttons vertically
-    alignItems: 'center', // Center buttons horizontally
-    gap: 10,
+  inputContainer: {
     width: '80%',
+    marginBottom: 20,
+  },
+  input: {
+    backgroundColor: '#ffffff',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    fontSize: 16,
   },
   button: {
     backgroundColor: '#005377',
@@ -81,10 +96,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#cfdee7',
     fontWeight: 'bold',
-  },
-  noDataText: {
-    color: '#800016',
-    marginTop: 20,
-    fontSize: 18,
+    fontSize: 16,
   },
 });

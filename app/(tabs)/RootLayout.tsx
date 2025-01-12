@@ -13,6 +13,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> 
 
         {/* Other screens are added as stack screens */}
+        <Stack.Screen name="YearSelector" options={{ headerShown: false }} />
         <Stack.Screen name="GroupSelection" options={{ headerShown: false }} />
         <Stack.Screen name="SubjectSchedule" options={{ headerShown: false }} />
         <Stack.Screen name="SubjectSelection" options={{ headerShown: false }} />
