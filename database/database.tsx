@@ -22,6 +22,18 @@ export const initializeDatabase = async () => {
         group_name TEXT NOT NULL,
         FOREIGN KEY (year_id) REFERENCES years(id)
       );
+      CREATE TABLE IF NOT EXISTS professors (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        title TEXT NOT NULL,
+        department TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS places (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        room_name TEXT NOT NULL,
+        place_name TEXT NOT NULL,
+        address TEXT NOT NULL
+      );
       CREATE TABLE IF NOT EXISTS subjects (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         group_id INTEGER,
@@ -29,8 +41,12 @@ export const initializeDatabase = async () => {
         day TEXT NOT NULL,
         hour TEXT NOT NULL,
         type INTEGER NOT NULL CHECK (type IN (1, 2, 3, 4)),
-        FOREIGN KEY (group_id) REFERENCES groups(id)
-      );
+        place_id INTEGER,  -- Now references the places table
+        professor_id INTEGER,
+        FOREIGN KEY (group_id) REFERENCES groups(id),
+        FOREIGN KEY (professor_id) REFERENCES professors(id),
+        FOREIGN KEY (place_id) REFERENCES places(id)  
+    );
       CREATE TABLE IF NOT EXISTS accounts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
@@ -54,6 +70,9 @@ export const dropAllTables = async () => {
       DROP TABLE IF EXISTS subjects;
       DROP TABLE IF EXISTS groups;
       DROP TABLE IF EXISTS years;
+      DROP TABLE IF EXISTS professors;
+      DROP TABLE IF EXISTS places;
+
     `);
     console.log('All tables dropped successfully');
   } catch (error) {
@@ -74,26 +93,37 @@ export const insertSampleData = async () => {
       INSERT INTO groups (year_id, group_name) VALUES (2, 'Group A');
       INSERT INTO groups (year_id, group_name) VALUES (2, 'Group B');
 
-      -- Insert subjects with day, hour, and type
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (1, 'AI', 'Monday', '09:00 AM', 1);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (1, 'Proiect Colectiv', 'Tuesday', '11:00 AM', 2);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (2, 'Limba Spaniola', 'Wednesday', '10:00 AM', 3);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (2, 'Matematica', 'Thursday', '02:00 PM', 1);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (3, 'Fizica', 'Friday', '01:00 PM', 2);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (1, 'History', 'Monday', '10:00 AM', 4);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (1, 'Geography', 'Monday', '11:00 AM', 4);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (2, 'Art', 'Tuesday', '09:00 AM', 4);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (2, 'Music', 'Tuesday', '10:00 AM', 4);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (3, 'Philosophy', 'Wednesday', '11:00 AM', 4);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (3, 'Ethics', 'Wednesday', '12:00 PM', 4);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (4, 'Drama', 'Thursday', '01:00 PM', 4);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (4, 'Economics', 'Thursday', '02:00 PM', 4);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (4, 'Political Science', 'Friday', '09:00 AM', 4);
-      INSERT INTO subjects (group_id, subject_name, day, hour, type) VALUES (4, 'Statistics', 'Friday', '10:00 AM', 4);
+      INSERT INTO professors (name, title, department) VALUES
+      ('John Doe', 'Professor', 'Computer Science'),
+      ('Jane Smith', 'Associate Professor', 'Mathematics'),
+      ('Emily Johnson', 'Lecturer', 'Physics'),
+      ('Michael Brown', 'Professor', 'History'),
+      ('David Williams', 'Assistant Professor', 'Philosophy');
 
-      
+      INSERT INTO places (room_name, place_name, address) VALUES
+      ('Room 101', 'Main Building', '123 University St'),
+      ('Room 102', 'Science Block', '456 Science Ave'),
+      ('Room 103', 'Library', '789 Knowledge Rd'),
+      ('Room 104', 'Engineering Hall', '321 Tech Blvd'),
+      ('Room 105', 'Physics Center', '654 Quantum St'),
+      ('Room 106', 'History Department', '147 Heritage Ln'),
+      ('Room 107', 'Geography Wing', '258 Global Ave'),
+      ('Room 108', 'Art Studio', '369 Creative St'),
+      ('Room 109', 'Music Hall', '741 Symphony Rd');
 
-      -- Insert sample accounts
+       
+      INSERT INTO subjects (group_id, subject_name, day, hour, type, place_id, professor_id) VALUES
+      (1, 'AI', 'Monday', '09:00 AM', 1, 1, 1),   -- Room 101
+      (1, 'Proiect Colectiv', 'Tuesday', '11:00 AM', 2, 2, 2),   -- Room 102
+      (2, 'Limba Spaniola', 'Wednesday', '10:00 AM', 3, 3, 3),   -- Room 103
+      (2, 'Matematica', 'Thursday', '02:00 PM', 1, 4, 2),   -- Room 104
+      (3, 'Fizica', 'Friday', '01:00 PM', 2, 5, 3),   -- Room 105
+      (1, 'History', 'Monday', '10:00 AM', 4, 6, 4),   -- Room 106
+      (1, 'Geography', 'Monday', '11:00 AM', 4, 7, 4),   -- Room 107
+      (2, 'Art', 'Tuesday', '09:00 AM', 4, 8, 5),   -- Room 108
+      (2, 'Music', 'Tuesday', '10:00 AM', 4, 9, 5);   -- Room 109
+
+        -- Insert sample accounts
       INSERT INTO accounts (username, password, role) VALUES ('admin', 'admin123', 'admin');
       INSERT INTO accounts (username, password, role) VALUES ('user1', 'password1', 'user');
       INSERT INTO accounts (username, password, role) VALUES ('user2', 'password2', 'user');
@@ -171,6 +201,31 @@ export const fetchSubjectSchedule = async (groupId: number) => {
     return [];
   }
 };
+
+export const fetchSubjectById = async (subjectName: string, groupId: number) => {
+  try {
+    const result = await db.getFirstAsync(
+      `SELECT subjects.*, 
+              professors.name AS professor_name, 
+              professors.title, 
+              professors.department, 
+              places.room_name, 
+              places.place_name, 
+              places.address
+       FROM subjects
+       LEFT JOIN professors ON subjects.professor_id = professors.id
+       LEFT JOIN places ON subjects.place_id = places.id
+       WHERE subjects.subject_name = ? AND subjects.group_id = ?`,
+      [subjectName, groupId]
+    );
+    return result;
+  } catch (error) {
+    console.error('Error fetching subject details:', error);
+    return null;
+  }
+};
+
+
 
 // Fetch all users
 export const fetchUsers = async (): Promise<{ id: number; username: string; password: string; role: string; }[]> => {

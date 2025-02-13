@@ -1,36 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { fetchSubjects } from '../../database/database';
 
 export default function SubjectScheduleScreen() {
   const { groupId, selectedSubjects } = useLocalSearchParams();
   const [schedule, setSchedule] = useState<any[]>([]);
+  const router = useRouter();
 
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   const loadSchedule = async () => {
     if (groupId) {
-      // Parse selectedSubjects if it is a string; otherwise, use it as is
       const selected =
         typeof selectedSubjects === 'string'
           ? JSON.parse(selectedSubjects)
           : Array.isArray(selectedSubjects)
           ? selectedSubjects
           : [];
-      console.log('Parsed selectedSubjects:', selected);
 
-      // Fetch all subjects for the group
       const allSubjects = await fetchSubjects(Number(groupId));
-      console.log('All subjects:', allSubjects);
 
-      // Filter subjects: Include selected ones and all type 4 subjects
       const filteredSchedule = allSubjects.filter(
         (subject) => selected.includes(subject.subject_name) || subject.type === 4
       );
-      console.log('Filtered schedule:', filteredSchedule);
 
       setSchedule(filteredSchedule);
     }
@@ -40,7 +35,6 @@ export default function SubjectScheduleScreen() {
     loadSchedule();
   }, [groupId, selectedSubjects]);
 
-  // Function to get subjects by day
   const getSubjectsByDay = (day: string) => {
     return schedule.filter((subject) => subject.day === day);
   };
@@ -60,11 +54,28 @@ export default function SubjectScheduleScreen() {
               <Text style={styles.dayTitle}>{day}</Text>
               {subjectsForDay.length > 0 ? (
                 subjectsForDay.map((subject, index) => (
-                  <View key={index} style={styles.scheduleItem}>
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.scheduleItem}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/subject-details',
+                        params: { 
+                          subjectName: subject.subject_name,
+                          day: subject.day,
+                          hour: subject.hour,
+                          type: subject.type,
+                          place: subject.place,
+                          professorId: subject.professor_id,
+                          groupId: subject.group_id
+                        },
+                      })
+                    }
+                  >
                     <Text style={styles.subjectText}>
                       {subject.subject_name} - {subject.hour}
                     </Text>
-                  </View>
+                  </TouchableOpacity>
                 ))
               ) : (
                 <View style={styles.scheduleItem}>
@@ -119,11 +130,5 @@ const styles = StyleSheet.create({
   subjectText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
-  },
-  noDataText: {
-    color: '#80DEEA',
-    fontSize: 18,
-    textAlign: 'center',
-    marginTop: 20,
   },
 });
