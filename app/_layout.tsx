@@ -61,6 +61,7 @@ export default function RootLayout() {
         <Stack.Screen name="GroupSelection" />
         <Stack.Screen name="SubjectSchedule" />
         <Stack.Screen name="SubjectSelection" />
+        <Stack.Screen name="AdminTab" />
       </Stack>
     </ThemeProvider>
   );

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { useLocalSearchParams } from 'expo-router';
-import { fetchSubjectById } from '../../database/database'; // Fetch function
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { fetchSubjectById, deleteSubject } from '../../database/database'; // Fetch & delete functions
 import * as Location from 'expo-location';
 
 export default function SubjectDetailsScreen() {
-  const { subjectName, groupId } = useLocalSearchParams();
+  const { subjectName, groupId, userRole } = useLocalSearchParams();
+  const router = useRouter();
 
   // Ensure subjectName is always a string
   const subjectNameStr = Array.isArray(subjectName) ? subjectName[0] : subjectName;
@@ -16,19 +17,17 @@ export default function SubjectDetailsScreen() {
 
   useEffect(() => {
     const loadSubjectDetails = async () => {
-      if (subjectName && groupId) {
-        const subjectNameString = Array.isArray(subjectName) ? subjectName[0] : subjectName;
-  
-        const details = await fetchSubjectById(subjectNameString, Number(groupId));
+      if (subjectNameStr && groupId) {
+        const details = await fetchSubjectById(subjectNameStr, Number(groupId));
         setSubjectDetails(details);
-  
+
         if (details?.address) {
           await fetchCoordinates(details.address);
         }
       }
     };
     loadSubjectDetails();
-  }, [subjectName, groupId]);
+  }, [subjectNameStr, groupId]);
 
   // Fetch coordinates using Geolocation API
   const fetchCoordinates = async (address: string) => {
@@ -43,6 +42,32 @@ export default function SubjectDetailsScreen() {
     } catch (error) {
       console.error('Error fetching coordinates:', error);
     }
+  };
+
+  const handleDeleteSubject = async () => {
+    if (!subjectDetails) return;
+
+    Alert.alert(
+      'Delete Subject',
+      `Are you sure you want to delete ${subjectDetails.subject_name}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteSubject(subjectDetails.id);
+              Alert.alert('Success', 'Subject deleted successfully.');
+              router.back(); // Go back to previous screen
+            } catch (error) {
+              console.error('❌ Error deleting subject:', error);
+              Alert.alert('Error', 'Failed to delete subject.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (!subjectDetails) {
@@ -80,7 +105,6 @@ export default function SubjectDetailsScreen() {
         </View>
       )}
 
-      {/* Google Map Section */}
       {location && (
         <MapView
           style={styles.map}
@@ -91,12 +115,15 @@ export default function SubjectDetailsScreen() {
             longitudeDelta: 0.01,
           }}
         >
-          <Marker
-            coordinate={location}
-            title={subjectDetails.place_name}
-            description={subjectDetails.address}
-          />
+          <Marker coordinate={location} title={subjectDetails.place_name} description={subjectDetails.address} />
         </MapView>
+      )}
+
+      {/* Admin-only Delete Button */}
+      {userRole === 'admin' && (
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteSubject}>
+          <Text style={styles.deleteButtonText}>Delete Subject</Text>
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -113,30 +140,31 @@ const getTypeName = (type: number) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#003BB5',
+  container: { flex: 1, padding: 20, backgroundColor: '#003BB5', alignItems: 'center' },
+  title: { fontSize: 26, fontWeight: 'bold', marginBottom: 20, color: '#FEFFFE', textAlign: 'center' },
+  infoContainer: { backgroundColor: '#1A237E', padding: 15, borderRadius: 10, width: '100%', marginBottom: 20 },
+  infoText: { fontSize: 18, color: '#FFFFFF', marginBottom: 5 },
+  map: { width: '100%', height: 200, marginTop: 20, borderRadius: 10 },
+  deleteButton: {
+    backgroundColor: '#D32F2F', // Red delete button
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginTop: 20,
     alignItems: 'center',
+    width: '90%',
   },
-  title: {
-    fontSize: 26,
+  deleteButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 20,
+  },
+  loadingText: {
+    fontSize: 20,
     color: '#FEFFFE',
     textAlign: 'center',
-  },
-  infoContainer: {
-    backgroundColor: '#1A237E',
-    padding: 15,
-    borderRadius: 10,
-    width: '100%',
-    marginBottom: 20,
-  },
-  infoText: {
-    fontSize: 18,
-    color: '#FFFFFF',
-    marginBottom: 5,
+    marginTop: 50,
+    fontWeight: 'bold',
   },
   placeContainer: {
     backgroundColor: '#0D47A1',
@@ -161,6 +189,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     width: '100%',
+    marginBottom: 20,
   },
   professorTitle: {
     fontSize: 20,
@@ -171,16 +200,7 @@ const styles = StyleSheet.create({
   professorText: {
     fontSize: 18,
     color: '#FEFFFE',
+    marginBottom: 5,
   },
-  loadingText: {
-    fontSize: 20,
-    color: '#FEFFFE',
-    textAlign: 'center',
-  },
-  map: {
-    width: '100%',
-    height: 200,
-    marginTop: 20,
-    borderRadius: 10,
-  },
+  
 });

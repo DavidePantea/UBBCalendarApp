@@ -47,7 +47,7 @@ export default function LoginScreen() {
 
       if (userSubjects.length > 0) {
         console.log(`🔹 Redirecting to SubjectSchedule for userId: ${user.id}`);
-        router.push(`/SubjectSchedule?userId=${user.id}&groupId=${userDetails.group_id}&selectedSubjects=${JSON.stringify(userSubjects.map(s => s.subject_id))}`);
+        router.push(`/SubjectSchedule?userId=${user.id}&groupId=${userDetails.group_id}&selectedSubjects=${JSON.stringify(userSubjects.map(s => s.subject_id))}&userRole=${user.role}`);
       } else {
         console.log(`⚠️ No subjects selected. Redirecting to SubjectsSelection.`);
         router.push(`/SubjectsSelection?groupId=${userDetails.group_id}&userId=${user.id}`);

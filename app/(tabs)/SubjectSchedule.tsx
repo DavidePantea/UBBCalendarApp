@@ -6,7 +6,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { fetchSubjects } from '../../database/database';
 
 export default function SubjectScheduleScreen() {
-  const { groupId, selectedSubjects } = useLocalSearchParams();
+  const { groupId, selectedSubjects, userRole } = useLocalSearchParams(); // ✅ Get userRole
   const [schedule, setSchedule] = useState<any[]>([]);
   const router = useRouter();
 
@@ -16,24 +16,27 @@ export default function SubjectScheduleScreen() {
     if (groupId) {
       const selected =
         typeof selectedSubjects === 'string'
-          ? JSON.parse(selectedSubjects)
+          ? JSON.parse(selectedSubjects) // ✅ Parse subject IDs correctly
           : Array.isArray(selectedSubjects)
           ? selectedSubjects
           : [];
-
+  
       const allSubjects = await fetchSubjects(Number(groupId));
-
+  
+      // ✅ Filter by subject IDs instead of names
       const filteredSchedule = allSubjects.filter(
-        (subject) => selected.includes(subject.subject_name) || subject.type === 4
+        (subject) => selected.includes(subject.id) || subject.type === 4
       );
-
+  
       setSchedule(filteredSchedule);
+      console.log('📌 Final Schedule:', filteredSchedule); // Debugging output
     }
   };
 
   useEffect(() => {
+    console.log("User Role:", userRole); // ✅ Logs the user role to the console
     loadSchedule();
-  }, [groupId, selectedSubjects]);
+  }, [groupId, selectedSubjects, userRole]);
 
   const getSubjectsByDay = (day: string) => {
     return schedule.filter((subject) => subject.day === day);
@@ -55,27 +58,28 @@ export default function SubjectScheduleScreen() {
               {subjectsForDay.length > 0 ? (
                 subjectsForDay.map((subject, index) => (
                   <TouchableOpacity
-                    key={index}
-                    style={styles.scheduleItem}
-                    onPress={() =>
-                      router.push({
-                        pathname: '/subject-details',
-                        params: { 
-                          subjectName: subject.subject_name,
-                          day: subject.day,
-                          hour: subject.hour,
-                          type: subject.type,
-                          place: subject.place,
-                          professorId: subject.professor_id,
-                          groupId: subject.group_id
-                        },
-                      })
-                    }
-                  >
-                    <Text style={styles.subjectText}>
-                      {subject.subject_name} - {subject.hour}
-                    </Text>
-                  </TouchableOpacity>
+                  key={index}
+                  style={styles.scheduleItem}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/subject-details',
+                      params: { 
+                        subjectName: subject.subject_name,
+                        day: subject.day,
+                        hour: subject.hour,
+                        type: subject.type,
+                        place: subject.place,
+                        professorId: subject.professor_id,
+                        groupId: subject.group_id,
+                        userRole, // ✅ Pass userRole
+                      },
+                    })
+                  }
+                >
+                  <Text style={styles.subjectText}>
+                    {subject.subject_name} - {subject.hour}
+                  </Text>
+                </TouchableOpacity>
                 ))
               ) : (
                 <View style={styles.scheduleItem}>
@@ -86,6 +90,16 @@ export default function SubjectScheduleScreen() {
           );
         })}
       </View>
+
+      {/* Admin-only "Add Subject" button */}
+      {userRole === 'admin' && (
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => router.push('/AddSubject')}
+        >
+          <Text style={styles.addButtonText}>Add Subject</Text>
+        </TouchableOpacity>
+      )}
     </ThemedView>
   );
 }
@@ -129,6 +143,20 @@ const styles = StyleSheet.create({
   },
   subjectText: {
     color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  addButton: {
+    backgroundColor: '#4CAF50', // Green color for the button
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    width: '90%',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  addButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });

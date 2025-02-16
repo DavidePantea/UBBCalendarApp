@@ -345,3 +345,82 @@ export const fetchUserDetails = async (userId: number) => {
     return null;
   }
 };
+
+export const addSubject = async (
+  groupId: number,
+  subjectName: string,
+  day: string,
+  hour: string,
+  type: number,
+  placeId: number,
+  professorId: number
+) => {
+  const query = `
+    INSERT INTO subjects (group_id, subject_name, day, hour, type, place_id, professor_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  await db.runAsync(query, [
+    groupId,
+    subjectName,
+    day,
+    hour,
+    type,
+    placeId,
+    professorId,
+  ]);
+};
+
+export const deleteSubject = async (subjectId: number): Promise<void> => {
+  try {
+    await db.runAsync(`DELETE FROM subjects WHERE id = ?`, [subjectId]);
+    console.log(`✅ Subject ID ${subjectId} deleted.`);
+  } catch (error) {
+    console.error('❌ Error deleting subject:', error);
+  }
+};
+
+export const fetchProfessors = async (): Promise<{ id: number; name: string }[]> => {
+  return await db.getAllAsync(`SELECT id, name FROM professors`);
+};
+
+export const fetchPlaces = async (): Promise<{ id: number; room_name: string; place_name: string }[]> => {
+  return await db.getAllAsync(`SELECT id, room_name, place_name FROM places`);
+};
+
+export const fetchAllSubjects = async (): Promise<{ id: number; subject_name: string }[]> => {
+  try {
+    return await db.getAllAsync('SELECT id, subject_name FROM subjects');
+  } catch (error) {
+    console.error('Error fetching subjects:', error);
+    return [];
+  }
+};
+
+export const fetchAllGroups = async (): Promise<{ id: number; group_name: string }[]> => {
+  try {
+    return await db.getAllAsync('SELECT id, group_name FROM groups');
+  } catch (error) {
+    console.error('Error fetching groups:', error);
+    return [];
+  }
+};
+
+export const fetchAllProfessors = async (): Promise<{ id: number; name: string }[]> => {
+  try {
+    return await db.getAllAsync('SELECT id, name FROM professors');
+  } catch (error) {
+    console.error('Error fetching professors:', error);
+    return [];
+  }
+};
+
+export const fetchAllPlaces = async (): Promise<{ id: number; room_name: string; place_name: string }[]> => {
+  try {
+    return await db.getAllAsync('SELECT id, room_name, place_name FROM places');
+  } catch (error) {
+    console.error('Error fetching places:', error);
+    return [];
+  }
+};
+

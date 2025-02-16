@@ -22,24 +22,31 @@ export default function SubjectsSelection() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedSubjects, setSelectedSubjects] = useState<number[]>([]); // Store subject IDs
 
-  console.log('✅ groupId:', groupId, 'userRole:', userRole, 'userId:', userId);
+  console.log('groupId:', groupId, 'userRole:', userRole, 'userId:', userId);
 
   useEffect(() => {
     const loadSubjects = async () => {
       if (groupId) {
         const allSubjects = await fetchSubjects(Number(groupId));
-        const filteredSubjects = userRole === 'admin' ? allSubjects : allSubjects.filter((subject) => subject.type === 1 || subject.type === 2);
+        const filteredSubjects = userRole === 'admin' 
+          ? allSubjects 
+          : allSubjects.filter((subject) => subject.type === 1 || subject.type === 2);
+          
         setSubjects(filteredSubjects);
+  
+        console.log('📌 Loaded Subjects:', filteredSubjects); // ✅ Logs the subjects list
       }
     };
-
+  
     const loadUserSubjects = async () => {
       if (userId) {
         const userSubjects = await fetchUserSubjects(Number(userId));
-        setSelectedSubjects(userSubjects.map((subject: any) => subject.subject_id)); // ✅ Store selected subject IDs
+        setSelectedSubjects(userSubjects.map((subject: any) => subject.subject_id));
+  
+        console.log('📌 User Selected Subjects:', userSubjects); // ✅ Logs the user's selected subjects
       }
     };
-
+  
     loadSubjects();
     loadUserSubjects();
   }, [groupId, userRole, userId]);
@@ -64,12 +71,17 @@ export default function SubjectsSelection() {
   };
 
   const handleViewSchedule = () => {
-    router.push(`/SubjectSchedule?groupId=${groupId}&selectedSubjects=${JSON.stringify(selectedSubjects)}`);
+    router.push({
+      pathname: '/SubjectSchedule',
+      params: {
+        groupId,
+        selectedSubjects: JSON.stringify(selectedSubjects), // ✅ Correctly passing IDs
+        userRole, 
+      },
+    });
   };
 
-  const handleModifySchedule = () => {
-    router.push(`/ModifySchedule?groupId=${groupId}`);
-  };
+
 
   const isSelected = (subjectId: number) => selectedSubjects.includes(subjectId);
 
@@ -102,11 +114,6 @@ export default function SubjectsSelection() {
         </Pressable>
       )}
 
-      {userRole === 'admin' && (
-        <Pressable style={styles.modifyButton} onPress={handleModifySchedule}>
-          <Text style={styles.modifyButtonText}>Modify Schedule</Text>
-        </Pressable>
-      )}
     </ThemedView>
   );
 }

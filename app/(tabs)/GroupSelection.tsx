@@ -7,15 +7,15 @@ import { fetchGroups, updateUserYearAndGroup } from '../../database/database';
 
 export default function GroupSelectionScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams(); // ✅ HOOK CALLED AT TOP LEVEL - NO ERROR!
-  const { yearId, userId, userRole } = params;
+  const params = useLocalSearchParams(); // ✅ Get all params
+  const { yearId, userId, userRole } = params; // ✅ Extract userRole too
   const [groups, setGroups] = useState<any[]>([]);
 
   useEffect(() => {
     const loadGroups = async () => {
       if (yearId) {
         const data = await fetchGroups(Number(yearId));
-        console.log('Groups data:', data);
+        console.log('📌 Groups data:', data);
         setGroups(data);
       }
     };
@@ -28,11 +28,19 @@ export default function GroupSelectionScreen() {
       return;
     }
 
-    console.log(`✅ Selecting Group: ${groupId} for User: ${userId} and Year: ${yearId}`);
+    console.log(`✅ Selecting Group: ${groupId} for User: ${userId}, Year: ${yearId}, Role: ${userRole}`);
 
     try {
       await updateUserYearAndGroup(Number(userId), Number(yearId), groupId);
-      router.push(`/SubjectsSelection?groupId=${groupId}&userId=${userId}`);
+      router.push({
+        pathname: '/SubjectsSelection',
+        params: {
+          groupId,
+          userRole,
+          userId,
+           // ✅ Pass userRole to the next tab
+        },
+      });
     } catch (error) {
       console.error('❌ Error updating user info:', error);
     }
