@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Pressable, Text } from 'react-native';
+import { StyleSheet, View, Pressable, Text, Alert } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { fetchSubjects } from '../../database/database';
+import { fetchSubjects, addUserSubject, removeUserSubject, fetchUserSubjects } from '../../database/database';
 
 type Subject = {
   id: number;
@@ -16,66 +16,77 @@ type Subject = {
 
 export default function SubjectsSelection() {
   const router = useRouter();
-  const { groupId, userRole } = useLocalSearchParams();
+  const params = useLocalSearchParams(); // ✅ Get all parameters
+  const { groupId, userRole, userId } = params; // Extract userId from navigation params
+
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
-  console.log('groupId:', groupId, 'userRole:', userRole);
+  const [selectedSubjects, setSelectedSubjects] = useState<number[]>([]); // Store subject IDs
 
-  const loadSubjects = async () => {
-    if (groupId) {
-      const allSubjects = await fetchSubjects(Number(groupId));
-
-      // Filter subjects based on user role
-      const filteredSubjects =
-        userRole === 'admin'
-          ? allSubjects // Admin sees all subjects
-          : allSubjects.filter((subject) => subject.type === 1 || subject.type === 2);
-
-      setSubjects(filteredSubjects);
-    }
-  };
+  console.log('✅ groupId:', groupId, 'userRole:', userRole, 'userId:', userId);
 
   useEffect(() => {
-    loadSubjects();
-  }, [groupId, userRole]);
+    const loadSubjects = async () => {
+      if (groupId) {
+        const allSubjects = await fetchSubjects(Number(groupId));
+        const filteredSubjects = userRole === 'admin' ? allSubjects : allSubjects.filter((subject) => subject.type === 1 || subject.type === 2);
+        setSubjects(filteredSubjects);
+      }
+    };
 
-  const handleSubjectPress = (subjectName: string) => {
-    if (selectedSubjects.includes(subjectName)) {
-      setSelectedSubjects(selectedSubjects.filter((item) => item !== subjectName));
+    const loadUserSubjects = async () => {
+      if (userId) {
+        const userSubjects = await fetchUserSubjects(Number(userId));
+        setSelectedSubjects(userSubjects.map((subject: any) => subject.subject_id)); // ✅ Store selected subject IDs
+      }
+    };
+
+    loadSubjects();
+    loadUserSubjects();
+  }, [groupId, userRole, userId]);
+
+  const handleSubjectPress = async (subjectId: number) => {
+    if (!userId) {
+      Alert.alert('❌ Error', 'User ID is missing');
+      return;
+    }
+
+    const normalizedUserId = Number(userId);
+
+    if (selectedSubjects.includes(subjectId)) {
+      await removeUserSubject(normalizedUserId, subjectId);
+      setSelectedSubjects(selectedSubjects.filter((id) => id !== subjectId));
+      console.log(`❌ Removed subject ${subjectId} for user ${normalizedUserId}`);
     } else {
-      setSelectedSubjects([...selectedSubjects, subjectName]);
+      await addUserSubject(normalizedUserId, subjectId);
+      setSelectedSubjects([...selectedSubjects, subjectId]);
+      console.log(`✅ Added subject ${subjectId} for user ${normalizedUserId}`);
     }
   };
 
   const handleViewSchedule = () => {
-    router.push(
-      `/SubjectSchedule?groupId=${groupId}&selectedSubjects=${JSON.stringify(selectedSubjects)}`
-    );
+    router.push(`/SubjectSchedule?groupId=${groupId}&selectedSubjects=${JSON.stringify(selectedSubjects)}`);
   };
 
   const handleModifySchedule = () => {
     router.push(`/ModifySchedule?groupId=${groupId}`);
   };
 
-  const isSelected = (subjectName: string) => selectedSubjects.includes(subjectName);
+  const isSelected = (subjectId: number) => selectedSubjects.includes(subjectId);
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>
-        Select a Subject
-      </ThemedText>
+      <ThemedText type="title" style={styles.title}>Select a Subject</ThemedText>
 
       <View style={styles.buttonContainer}>
         {subjects.length > 0 ? (
           subjects.map((subject) => (
             <Pressable
               key={subject.id}
-              style={({ pressed }) => [
+              style={[
                 styles.button,
-                isSelected(subject.subject_name) && styles.buttonSelected,
-                pressed && styles.buttonPressed,
+                isSelected(subject.id) && styles.buttonSelected,
               ]}
-              onPress={() => handleSubjectPress(subject.subject_name)}
+              onPress={() => handleSubjectPress(subject.id)}
             >
               <Text style={styles.buttonText}>{subject.subject_name}</Text>
             </Pressable>
@@ -91,7 +102,6 @@ export default function SubjectsSelection() {
         </Pressable>
       )}
 
-      {/* Add Modify Schedule Button for Admin */}
       {userRole === 'admin' && (
         <Pressable style={styles.modifyButton} onPress={handleModifySchedule}>
           <Text style={styles.modifyButtonText}>Modify Schedule</Text>
@@ -132,9 +142,6 @@ const styles = StyleSheet.create({
   },
   buttonSelected: {
     backgroundColor: '#7B1FA2',
-  },
-  buttonPressed: {
-    backgroundColor: '#80DEEA',
   },
   buttonText: {
     color: '#FFFFFF',

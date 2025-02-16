@@ -3,46 +3,48 @@ import { StyleSheet, View, Pressable, Text } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { fetchGroups } from '../../database/database';
+import { fetchGroups, updateUserYearAndGroup } from '../../database/database';
 
 export default function GroupSelectionScreen() {
   const router = useRouter();
-  const { yearId, userRole } = useLocalSearchParams(); // Get yearId and userRole from the previous screen
+  const params = useLocalSearchParams(); // ✅ HOOK CALLED AT TOP LEVEL - NO ERROR!
+  const { yearId, userId, userRole } = params;
   const [groups, setGroups] = useState<any[]>([]);
 
-  // Fetch groups when the screen loads
   useEffect(() => {
     const loadGroups = async () => {
       if (yearId) {
         const data = await fetchGroups(Number(yearId));
-        console.log('Groups data:', data); // Debug log
+        console.log('Groups data:', data);
         setGroups(data);
       }
     };
     loadGroups();
   }, [yearId]);
 
-  const handleGroupPress = (groupId: number) => {
-    // Pass userRole along with groupId to the next screen
-    router.push(`/SubjectsSelection?groupId=${groupId}&userRole=${userRole}`);
+  const handleGroupPress = async (groupId: number) => {
+    if (!userId) {
+      console.error('❌ ERROR: userId is missing when selecting a group!');
+      return;
+    }
+
+    console.log(`✅ Selecting Group: ${groupId} for User: ${userId} and Year: ${yearId}`);
+
+    try {
+      await updateUserYearAndGroup(Number(userId), Number(yearId), groupId);
+      router.push(`/SubjectsSelection?groupId=${groupId}&userId=${userId}`);
+    } catch (error) {
+      console.error('❌ Error updating user info:', error);
+    }
   };
 
   return (
     <ThemedView style={styles.container}>
-      {/* Title at the top */}
-      <ThemedText type="title" style={styles.title}>
-        Select a Group
-      </ThemedText>
-  
-      {/* Group buttons in the middle */}
+      <ThemedText type="title" style={styles.title}>Select a Group</ThemedText>
       <View style={styles.buttonContainer}>
         {groups.length > 0 ? (
           groups.map((group) => (
-            <Pressable
-              key={group.id}
-              style={styles.button}
-              onPress={() => handleGroupPress(group.id)}
-            >
+            <Pressable key={group.id} style={styles.button} onPress={() => handleGroupPress(group.id)}>
               <Text style={styles.buttonText}>{group.group_name}</Text>
             </Pressable>
           ))

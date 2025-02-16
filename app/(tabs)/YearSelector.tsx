@@ -7,7 +7,8 @@ import { fetchYears } from '../../database/database';
 
 export default function TabOneScreen() {
   const router = useRouter();
-  const { userRole } = useLocalSearchParams(); // Get the user role from query parameters
+  const params = useLocalSearchParams(); // ✅ HOOK AT TOP LEVEL - NO ERROR!
+  const { userRole, userId } = params; // Extract userId from parameters
   const [years, setYears] = useState<any[]>([]);
 
   useEffect(() => {
@@ -19,8 +20,15 @@ export default function TabOneScreen() {
   }, []);
 
   const handleYearPress = (yearId: number) => {
-    // Pass the userRole to the next screen
-    router.push(`/GroupSelection?yearId=${yearId}&userRole=${userRole}`);
+    if (!userId) {
+      console.error('❌ ERROR: userId is missing in Year Selection!');
+      return;
+    }
+
+    console.log(`✅ Navigating to GroupSelection with userId: ${userId}, yearId: ${yearId}`);
+
+    // Pass userId along with yearId and userRole
+    router.push(`/GroupSelection?yearId=${yearId}&userId=${userId}&userRole=${userRole}`);
   };
 
   return (

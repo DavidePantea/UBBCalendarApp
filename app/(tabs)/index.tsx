@@ -3,7 +3,14 @@ import { StyleSheet, View, Pressable, Text, TextInput, Alert } from 'react-nativ
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useRouter } from 'expo-router';
-import { fetchUsers } from '../../database/database'; // Import only fetchUsers
+import { fetchUsers, fetchUserDetails, fetchUserSubjects } from '../../database/database';
+
+type User = {
+  id: number;
+  username: string;
+  password: string;
+  role: string;
+};
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -12,23 +19,42 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
-      // Fetch all users using fetchUsers
-      const users = await fetchUsers(); // Ensure fetchUsers returns all fields: id, username, password, role
-  
-      // Validate username and password
-      const user = users.find(
-        (u) => u.username === username && u.password === password
-      );
-  
-      if (user) {
-        Alert.alert('Login Successful', `Welcome, ${user.username}!`);
-        router.push(`/YearSelector?userRole=${user.role}`); // Pass the role as a query parameter
+      const users: User[] = await fetchUsers();
+      const user = users.find((u: User) => u.username === username && u.password === password);
+
+      if (!user) {
+        Alert.alert('❌ Login Failed', 'Invalid username or password');
+        return;
+      }
+
+      Alert.alert('✅ Login Successful', `Welcome, ${user.username}!`);
+      console.log(`🔹 Checking saved selections for userId: ${user.id}`);
+
+      // 🔥 Fetch user details (year, group)
+      const userDetails = await fetchUserDetails(user.id);
+
+      if (!userDetails || !userDetails.year_id || !userDetails.group_id) {
+        console.log(`⚠️ No year/group assigned. Redirecting to YearSelector.`);
+        router.push(`/YearSelector?userId=${user.id}&userRole=${user.role}`);
+        return;
+      }
+
+      console.log(`📌 User Details:`, userDetails);
+
+      // 🔥 Fetch user subjects
+      const userSubjects = await fetchUserSubjects(user.id);
+      console.log(`📌 User Subjects:`, userSubjects);
+
+      if (userSubjects.length > 0) {
+        console.log(`🔹 Redirecting to SubjectSchedule for userId: ${user.id}`);
+        router.push(`/SubjectSchedule?userId=${user.id}&groupId=${userDetails.group_id}&selectedSubjects=${JSON.stringify(userSubjects.map(s => s.subject_id))}`);
       } else {
-        Alert.alert('Login Failed', 'Invalid username or password');
+        console.log(`⚠️ No subjects selected. Redirecting to SubjectsSelection.`);
+        router.push(`/SubjectsSelection?groupId=${userDetails.group_id}&userId=${user.id}`);
       }
     } catch (error) {
-      console.error('Error during login:', error);
-      Alert.alert('Error', 'An error occurred while logging in.');
+      console.error('❌ Error during login:', error);
+      Alert.alert('❌ Error', 'Something went wrong during login.');
     }
   };
 
