@@ -34,7 +34,7 @@ export default function TabOneScreen() {
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>
-        Selectează anul:
+        Select Year:
       </ThemedText>
       <View style={styles.buttonContainer}>
         {years.length > 0 ? (
