@@ -16,6 +16,13 @@ export const initializeDatabase = async () => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         year TEXT NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS user_subjects (
+        user_id INTEGER NOT NULL,
+        subject_id INTEGER NOT NULL,
+        PRIMARY KEY (user_id, subject_id),
+        FOREIGN KEY (user_id) REFERENCES accounts(id) ON DELETE CASCADE,
+        FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
+    );
       CREATE TABLE IF NOT EXISTS groups (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         year_id INTEGER,
@@ -202,23 +209,33 @@ export const fetchSubjectSchedule = async (groupId: number) => {
   }
 };
 
-export const fetchSubjectById = async (subjectName: string, groupId: number) => {
+type SubjectDetails = {
+  subject_name: string;
+  day: string;
+  hour: string;
+  type: number;
+  address: string; // Ensure the property exists in the database
+  place_name: string;
+  room_name: string;
+  professor_name?: string;
+  title?: string;
+  department?: string;
+};
+
+export const fetchSubjectById = async (subjectName: string, groupId: number): Promise<SubjectDetails | null> => {
   try {
     const result = await db.getFirstAsync(
       `SELECT subjects.*, 
-              professors.name AS professor_name, 
-              professors.title, 
-              professors.department, 
-              places.room_name, 
-              places.place_name, 
-              places.address
+              places.address, places.room_name, places.place_name, 
+              professors.name AS professor_name, professors.title, professors.department
        FROM subjects
-       LEFT JOIN professors ON subjects.professor_id = professors.id
        LEFT JOIN places ON subjects.place_id = places.id
+       LEFT JOIN professors ON subjects.professor_id = professors.id
        WHERE subjects.subject_name = ? AND subjects.group_id = ?`,
       [subjectName, groupId]
     );
-    return result;
+
+    return result ? (result as SubjectDetails) : null;
   } catch (error) {
     console.error('Error fetching subject details:', error);
     return null;
@@ -236,5 +253,19 @@ export const fetchUsers = async (): Promise<{ id: number; username: string; pass
   } catch (error) {
     console.error('Error fetching users:', error);
     return [];
+  }
+};
+
+export const addUserSubject = async (userId: number, subjectId: number) => {
+  try {
+    // Insert the user-subject relationship into the many-to-many table
+    await db.runAsync(
+      `INSERT INTO user_subjects (user_id, subject_id) VALUES (?, ?)`,
+      [userId, subjectId] // Pass the parameters correctly as an array
+    );
+
+    console.log(`✅ Subject ${subjectId} successfully assigned to user ${userId}.`);
+  } catch (error) {
+    console.error('❌ Error adding subject to user:', error);
   }
 };

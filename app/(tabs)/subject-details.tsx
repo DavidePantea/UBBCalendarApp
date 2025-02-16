@@ -7,15 +7,21 @@ import * as Location from 'expo-location';
 
 export default function SubjectDetailsScreen() {
   const { subjectName, groupId } = useLocalSearchParams();
+
+  // Ensure subjectName is always a string
+  const subjectNameStr = Array.isArray(subjectName) ? subjectName[0] : subjectName;
+
   const [subjectDetails, setSubjectDetails] = useState<any>(null);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
     const loadSubjectDetails = async () => {
       if (subjectName && groupId) {
-        const details = await fetchSubjectById(subjectName, Number(groupId));
+        const subjectNameString = Array.isArray(subjectName) ? subjectName[0] : subjectName;
+  
+        const details = await fetchSubjectById(subjectNameString, Number(groupId));
         setSubjectDetails(details);
-
+  
         if (details?.address) {
           await fetchCoordinates(details.address);
         }
